@@ -2,7 +2,7 @@
 using WTelegram;
 using TL;
 
-namespace ArchiV1
+namespace BeholderArchi
 {
     internal class DLC
     {
@@ -29,3 +29,4 @@ namespace ArchiV1
         }
     }
 }
+

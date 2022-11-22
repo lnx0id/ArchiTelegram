@@ -7,10 +7,10 @@ using TL;
 using Message = Telegram.Bot.Types.Message;
 using MessageEntity = Telegram.Bot.Types.MessageEntity;
 using User = Telegram.Bot.Types.User;
-using ArchiV1;
+using BeholderArchi;
 using WTelegram;
 
-namespace ArchiV1
+namespace BeholderArchi
 {
     internal class Functionality
     {
@@ -30,8 +30,14 @@ namespace ArchiV1
         }
         async internal static Task echo(Message message, ITelegramBotClient botClient, CancellationToken cancellationToken)
         {
-            var echo = message.Text.Substring(10);
-            await messageSend(echo, botClient, cancellationToken, message.Chat.Id);
+            try
+            {
+                var echo = message.Text.Substring(10);
+                await messageSend(echo, botClient, cancellationToken, message.Chat.Id);
+            }
+            catch {
+                await messageSend("ты даже сдесь намудрил...", botClient, cancellationToken, message.Chat.Id);
+            }
         }
         async internal static Task whoami(Message message, ITelegramBotClient botClient, CancellationToken cancellationToken)
         {
@@ -202,7 +208,7 @@ namespace ArchiV1
                         await botClient.RestrictChatMemberAsync(message.Chat.Id, entities[0].User.Id, mutedPerms);
                         await messageSend("Пользователь успешно был замучен", botClient, cancellationToken, message.Chat.Id);
                     }
-                    catch (Exception e)
+                    catch 
                     {
                         await messageSend("Походу это админ... или какае-то другая ошибка", botClient, cancellationToken, message.Chat.Id);
                     }
@@ -454,6 +460,10 @@ namespace ArchiV1
         internal static string GetFullName(User member)
         {
             string FullName = member.FirstName + member.LastName;
+            return FullName;
+        }
+        internal static string GetFullName(Telegram.Bot.Types.Chat chat) {
+            string FullName = chat.FirstName + chat.LastName;
             return FullName;
         }
     }
