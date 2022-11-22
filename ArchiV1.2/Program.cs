@@ -37,6 +37,10 @@ cts.Cancel();
 
 async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
 {
+    if (update.Message.Type.ToString().ToLower().Contains("voice"))
+    {
+        await Functionality.messageSend("Голосовые говоришь?", botClient, cancellationToken, update.Message.Chat.Id);
+    }
     if (update.Message is not { } message)
         return;
     if (message.Text is not { } messageText)
