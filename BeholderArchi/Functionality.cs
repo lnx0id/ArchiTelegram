@@ -420,7 +420,6 @@ namespace BeholderArchi
                             cancellationToken: cancellationToken);
         }
 
-
         internal static string GetFullPermissionList(ChatMember member)
         {
             var fullList = "";
@@ -466,5 +465,25 @@ namespace BeholderArchi
             string FullName = chat.FirstName + chat.LastName;
             return FullName;
         }
+        internal static bool IsHaveBanPerms(ChatMember member)
+        {
+            var adminMember = member as ChatMemberAdministrator;
+            var ownerMember = member as ChatMemberOwner;
+            if (adminMember == null && ownerMember == null) return false;
+            if (ownerMember != null) return true;
+            if (adminMember != null && adminMember.CanRestrictMembers) return true;
+            else return false;
+            return true;
+        }
+        internal static bool IsHavePromotePerms(ChatMember member)
+        {
+            var adminMember = member as ChatMemberAdministrator;
+            var ownerMember = member as ChatMemberOwner;
+            if (adminMember == null && ownerMember == null) return false;
+            if (ownerMember != null) return true;
+            if (adminMember != null && adminMember.CanPromoteMembers) return true;
+            else return false;
+        }
+
     }
 }

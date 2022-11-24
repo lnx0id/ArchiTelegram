@@ -92,201 +92,80 @@ namespace BeholderArchi
                 else if (message.Text.Contains("remove"))
                 {
                     ChatMember messageFrom = await botClient.GetChatMemberAsync(message.Chat.Id, message.From.Id);
-                    if (messageFrom.Status.ToString().Contains("Administrator"))
-                    {
-                        var admin = messageFrom as ChatMemberAdministrator;
-                        if (admin.CanRestrictMembers)
-                        {
-                            var entities = message.Entities;
-                            await Functionality.banUser(message, entities, botClient, cancellationToken, app_client);
-                        }
-                        else
-                        {
-                            Message sentMessage = await botClient.SendTextMessageAsync(
-                                chatId: chatId,
-                                text: "`У тебя не достаточно прав`",
-                                parseMode: ParseMode.MarkdownV2,
-                                cancellationToken: cancellationToken);
-                        }
-                    }
-                    else if (messageFrom.Status.ToString().Contains("Creator"))
+                    if (Functionality.IsHaveBanPerms(messageFrom))
                     {
                         var entities = message.Entities;
                         await Functionality.banUser(message, entities, botClient, cancellationToken, app_client);
                     }
                     else
                     {
-                        Message sentMessage = await botClient.SendTextMessageAsync(
-                                chatId: chatId,
-                                text: "`У тебя не достаточно прав`",
-                                parseMode: ParseMode.MarkdownV2,
-                                cancellationToken: cancellationToken);
+                        await Functionality.messageSend("У тебя не достаточно прав", botClient, cancellationToken, chatId);
                     }
                 }
                 else if (message.Text.Contains("return"))
                 {
                     ChatMember messageFrom = await botClient.GetChatMemberAsync(message.Chat.Id, message.From.Id);
-                    if (messageFrom.Status.ToString().Contains("Administrator"))
-                    {
-                        var admin = messageFrom as ChatMemberAdministrator;
-                        if (admin.CanRestrictMembers)
-                        {
-                            var entities = message.Entities;
-                            await Functionality.unbanUser(message, entities, botClient, cancellationToken, app_client);
-                        }
-                        else
-                        {
-                            Message sentMessage = await botClient.SendTextMessageAsync(
-                                chatId: chatId,
-                                text: "`У тебя не достаточно прав`",
-                                parseMode: ParseMode.MarkdownV2,
-                                cancellationToken: cancellationToken);
-                        }
-                    }
-                    else if (messageFrom.Status.ToString().Contains("Creator"))
+                    if (Functionality.IsHaveBanPerms(messageFrom))
                     {
                         var entities = message.Entities;
                         await Functionality.unbanUser(message, entities, botClient, cancellationToken, app_client);
                     }
                     else
                     {
-                        Message sentMessage = await botClient.SendTextMessageAsync(
-                                chatId: chatId,
-                                text: "`У тебя не достаточно прав`",
-                                parseMode: ParseMode.MarkdownV2,
-                                cancellationToken: cancellationToken);
+                        await Functionality.messageSend("У тебя не достаточно прав", botClient, cancellationToken, chatId);
                     }
                 }
                 else if (message.Text.Contains("mute") && message.Text.Substring(5, 4).Contains("mute"))
                 {
                     ChatMember messageFrom = await botClient.GetChatMemberAsync(message.Chat.Id, message.From.Id);
-                    if (messageFrom.Status.ToString().Contains("Administrator"))
-                    {
-                        var admin = messageFrom as ChatMemberAdministrator;
-                        if (admin.CanRestrictMembers)
-                        {
-                            var entities = message.Entities;
-                            await Functionality.muteUser(message, entities, botClient, cancellationToken, app_client);
-                        }
-                        else
-                        {
-                            Message sentMessage = await botClient.SendTextMessageAsync(
-                                chatId: chatId,
-                                text: "`У тебя не достаточно прав`",
-                                parseMode: ParseMode.MarkdownV2,
-                                cancellationToken: cancellationToken);
-                        }
-                    }
-                    else if (messageFrom.Status.ToString().Contains("Creator"))
+                    if (Functionality.IsHaveBanPerms(messageFrom))
                     {
                         var entities = message.Entities;
                         await Functionality.muteUser(message, entities, botClient, cancellationToken, app_client);
                     }
                     else
                     {
-                        Message sentMessage = await botClient.SendTextMessageAsync(
-                                chatId: chatId,
-                                text: "`У тебя не достаточно прав`",
-                                parseMode: ParseMode.MarkdownV2,
-                                cancellationToken: cancellationToken);
+                        await Functionality.messageSend("У тебя не достаточно прав", botClient, cancellationToken, chatId);
                     }
                 }
                 else if (message.Text.Contains("unmute"))
                 {
                     ChatMember messageFrom = await botClient.GetChatMemberAsync(message.Chat.Id, message.From.Id);
-                    if (messageFrom.Status.ToString().Contains("Administrator"))
-                    {
-                        var admin = messageFrom as ChatMemberAdministrator;
-                        if (admin.CanRestrictMembers)
-                        {
-                            var entities = message.Entities;
-                            await Functionality.unmuteUser(message, entities, botClient, cancellationToken, app_client);
-                        }
-                        else
-                        {
-                            Message sentMessage = await botClient.SendTextMessageAsync(
-                                chatId: chatId,
-                                text: "`У тебя не достаточно прав`",
-                                parseMode: ParseMode.MarkdownV2,
-                                cancellationToken: cancellationToken);
-                        }
-                    }
-                    else if (messageFrom.Status.ToString().Contains("Creator"))
+                    if (Functionality.IsHaveBanPerms(messageFrom))
                     {
                         var entities = message.Entities;
                         await Functionality.unmuteUser(message, entities, botClient, cancellationToken, app_client);
                     }
                     else
                     {
-                        Message sentMessage = await botClient.SendTextMessageAsync(
-                                chatId: chatId,
-                                text: "`У тебя не достаточно прав`",
-                                parseMode: ParseMode.MarkdownV2,
-                                cancellationToken: cancellationToken);
+                        await Functionality.messageSend("У тебя не достаточно прав", botClient, cancellationToken, chatId);
                     }
                 }
                 else if (message.Text.Contains("chown full"))
                 {
                     ChatMember messageFrom = await botClient.GetChatMemberAsync(message.Chat.Id, message.From.Id);
-                    if (messageFrom.Status.ToString().Contains("Administrator"))
-                    {
-                        var admin = messageFrom as ChatMemberAdministrator;
-                        if (admin.CanPromoteMembers || admin.User.Id == 657318522)
-                        {
-                            var entities = message.Entities;
-                            await Functionality.chownFull(message, entities, botClient, cancellationToken, app_client);
-                        }
-                        else
-                        {
-                            Message sentMessage = await botClient.SendTextMessageAsync(
-                                chatId: chatId,
-                                text: "`У тебя не достаточно прав`",
-                                parseMode: ParseMode.MarkdownV2,
-                                cancellationToken: cancellationToken);
-                        }
-                    }
-                    else if (messageFrom.Status.ToString().Contains("Creator"))
+                    if (Functionality.IsHavePromotePerms(messageFrom))
                     {
                         var entities = message.Entities;
                         await Functionality.chownFull(message, entities, botClient, cancellationToken, app_client);
                     }
                     else
                     {
-                        Message sentMessage = await botClient.SendTextMessageAsync(
-                                chatId: chatId,
-                                text: "`У тебя не достаточно прав`",
-                                parseMode: ParseMode.MarkdownV2,
-                                cancellationToken: cancellationToken);
+                        await Functionality.messageSend("У тебя не достаточно прав", botClient, cancellationToken, chatId);
                     }
+
                 }
                 else if (message.Text.Contains("chown nofull"))
                 {
                     ChatMember messageFrom = await botClient.GetChatMemberAsync(message.Chat.Id, message.From.Id);
-                    if (messageFrom.Status.ToString().Contains("Administrator"))
-                    {
-                        var admin = messageFrom as ChatMemberAdministrator;
-                        if (admin.CanPromoteMembers)
-                        {
-                            var entities = message.Entities;
-                            await Functionality.chownNofull(message, entities, botClient, cancellationToken, app_client);
-                        }
-                        else
-                        {
-                            Message sentMessage = await botClient.SendTextMessageAsync(
-                                chatId: chatId,
-                                text: "`У тебя не достаточно прав`",
-                                parseMode: ParseMode.MarkdownV2,
-                                cancellationToken: cancellationToken);
-                        }
-                    }
-                    else if (messageFrom.Status.ToString().Contains("Creator"))
+                    if (Functionality.IsHavePromotePerms(messageFrom))
                     {
                         var entities = message.Entities;
                         await Functionality.chownNofull(message, entities, botClient, cancellationToken, app_client);
                     }
                     else
                     {
-                        await Functionality.messageSend("У тебя не достаточно прав", botClient, cancellationToken, message.Chat.Id);
+                        await Functionality.messageSend("У тебя не достаточно прав", botClient, cancellationToken, chatId);
                     }
                 }
                 else if (message.Text.Contains("chown get"))
