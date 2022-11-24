@@ -173,6 +173,19 @@ namespace BeholderArchi
                     var entities = message.Entities;
                     await Functionality.chownGet(message, entities, botClient, cancellationToken, app_client);
                 }
+                else if (message.Text.Contains("chown kill"))
+                {
+                    ChatMember messageFrom = await botClient.GetChatMemberAsync(message.Chat.Id, message.From.Id);
+                    if (Functionality.IsHavePromotePerms(messageFrom))
+                    {
+                        var entities = message.Entities;
+                        await Functionality.chownNo(message, entities, botClient, cancellationToken, app_client);
+                    }
+                    else
+                    {
+                        await Functionality.messageSend("У тебя не достаточно прав", botClient, cancellationToken, chatId);
+                    }
+                }
                 else if (message.Text.Contains("credits"))
                 {
                     await Functionality.credits(message, botClient, cancellationToken);

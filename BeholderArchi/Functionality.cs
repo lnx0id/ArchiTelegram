@@ -23,7 +23,8 @@ namespace BeholderArchi
                                             "mute @user - замутить",
                                             "unmute @user - размутить",
                                             "ping @user","touch - Создать ссылку приглашение",
-                                            "credits", "echo" };
+                                            "credits", "echo" ,
+                                            "chown kill @user - чтобы забрать права админа"};
         async internal static Task credits(Message message, ITelegramBotClient botClient, CancellationToken cancellationToken)
         {
             await messageSend("Writed by @I_am_Linuxoid\nЯ даже не юзал stackoverfow. только один вопросик на хабре:)", botClient, cancellationToken, message.Chat.Id);
@@ -410,6 +411,37 @@ namespace BeholderArchi
                         await messageSend("Фигня каке-то, репорты сюда - @ArchisErrors", botClient, cancellationToken, chatId);
                     }
                 }
+            }
+        }
+        async internal static Task chownNo(Message message, MessageEntity[] entities, ITelegramBotClient botClient,
+                                  CancellationToken cancellationToken, Client app_client)
+        {
+            var chatId = message.Chat.Id;
+            if (entities != null)
+            {
+                string userName = message.Text.Substring(17);
+                if (entities[0] != null && entities[0].User != null)
+                {
+                    try
+                    {
+                        await botClient.PromoteChatMemberAsync(message.Chat.Id, entities[0].User.Id, canManageChat: false, canRestrictMembers: false, canDeleteMessages: false, canPromoteMembers: false, canChangeInfo: false);
+                        await messageSend("пользователь был понижен", botClient, cancellationToken, chatId);
+                    }
+                    catch 
+                    {
+                        await messageSend("Что-то пошло не так, репорты сюда - @ArchisErrors", botClient, cancellationToken, chatId);
+                    }
+                }
+                else if (entities != null && entities[0].Type.ToString().Equals("Mention"))
+                {
+                    long UserId = await DLC.GetUserIdByUsernameAsync(userName, "5702729864:AAEkEyynxSnRcS4pe7C7gcA0eiThSCcwzlA", app_client);
+                    await botClient.PromoteChatMemberAsync(message.Chat.Id, UserId, canManageChat: false, canRestrictMembers: false, canDeleteMessages: false, canPromoteMembers: false, canChangeInfo: false);
+                    await messageSend("Пользователь успешно был понижен", botClient, cancellationToken, chatId);
+                }
+            }
+            else
+            {
+                await messageSend("Используй упоминания пользователя через @ или ссылкой", botClient, cancellationToken, chatId);
             }
         }
         async internal static Task messageSend(string text, ITelegramBotClient botClient, CancellationToken cancellationToken, ChatId chatId)
