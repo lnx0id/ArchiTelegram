@@ -9,6 +9,7 @@ using MessageEntity = Telegram.Bot.Types.MessageEntity;
 using User = Telegram.Bot.Types.User;
 using BeholderArchi;
 using WTelegram;
+using Microsoft.VisualBasic.ApplicationServices;
 
 namespace BeholderArchi
 {
@@ -50,34 +51,31 @@ namespace BeholderArchi
         async internal static Task ping(Message message, MessageEntity[] entities, ITelegramBotClient botClient,
                                   CancellationToken cancellationToken, Client app_client)
         {
-            if (entities != null)
-            {
-                if (entities[0].User != null)
-                {
-                    var member = await botClient.GetChatMemberAsync(message.Chat.Id, entities[0].User.Id);
-                    string fullInfo = GetFullInfoAboutUser(member);
-                    await messageSend($"{fullInfo}", botClient, cancellationToken, message.Chat.Id);
-                }
-                else if (entities[0] != null && entities[0].Type.ToString().Contains("Mention"))
-                {
-
-                    long memberId = await DLC.GetUserIdByUsernameAsync(message.Text.Substring(11), "5702729864:AAEkEyynxSnRcS4pe7C7gcA0eiThSCcwzlA", app_client);
-                    if (memberId != 0)
-                    {
-                        var member = await botClient.GetChatMemberAsync(message.Chat.Id, memberId);
-                        string fullInfo = GetFullInfoAboutUser(member);
-                        await messageSend($"{fullInfo}", botClient, cancellationToken, message.Chat.Id);
-                    }
-                    else
-                    {
-                        await messageSend($"Косяк! может ты не правильно упомянул? за репортами сюда - @ArchisErrors", botClient, cancellationToken, message.Chat.Id);
-                    }
-                }
-            }
-            else
-            {
+            ChatMember member;
+            if (entities == null || !entities[0].Type.ToString().Contains("Mention")) {
                 await messageSend("Ты должен упомянуть через @ или на прямую", botClient, cancellationToken, message.Chat.Id);
+                return;
             }
+
+            if (entities[0].User != null)
+            {
+                member = await botClient.GetChatMemberAsync(message.Chat.Id, entities[0].User.Id);
+                string fullInfo = GetFullInfoAboutUser(member);
+                await messageSend($"{fullInfo}", botClient, cancellationToken, message.Chat.Id);
+                return;
+            }
+
+
+            long memberId = await DLC.GetUserIdByUsernameAsync(message.Text.Substring(11), "5702729864:AAEkEyynxSnRcS4pe7C7gcA0eiThSCcwzlA", app_client);
+            if (memberId == 0) {
+                await messageSend($"Косяк! может ты не правильно упомянул? за репортами сюда - @ArchisErrors", botClient, cancellationToken, message.Chat.Id);
+                return;
+            }
+            
+            member = await botClient.GetChatMemberAsync(message.Chat.Id, memberId);
+            await messageSend(GetFullInfoAboutUser(member), botClient, cancellationToken, message.Chat.Id);
+
+            
         }
         async internal static Task printAdminsList(Message message, ITelegramBotClient botClient, CancellationToken cancellationToken)
         {
@@ -91,15 +89,11 @@ namespace BeholderArchi
             await messageSend($"{Perms}\n -- эти ребята имеют рут доступ", botClient, cancellationToken, message.Chat.Id);
 
         }
+
         async internal static Task banUser(Message message, MessageEntity[] entities, ITelegramBotClient botClient,
                                   CancellationToken cancellationToken, Client app_client)
         {
-            if (entities[0] == null)
-            {
-                await messageSend("Браток, ты никого не упомянул. Юзай @", botClient, cancellationToken, message.Chat.Id);
-                return;
-            }
-            if (!entities[0].Type.ToString().Contains("Mention"))
+            if (entities == null || !entities[0].Type.ToString().Contains("Mention"))
             {
                 await messageSend("Браток, ты никого не упомянул. Юзай @", botClient, cancellationToken, message.Chat.Id);
                 return;
@@ -127,7 +121,6 @@ namespace BeholderArchi
 
             try
             {
-                var member = await botClient.GetChatMemberAsync(message.Chat.Id, memberId);
                 await botClient.BanChatMemberAsync(message.Chat.Id, memberId);
             }
             catch
@@ -137,18 +130,12 @@ namespace BeholderArchi
             }
             await messageSend("Успешно забанен", botClient, cancellationToken, message.Chat.Id);
         }
-
         async internal static Task unbanUser(Message message, MessageEntity[] entities, ITelegramBotClient botClient,
                                   CancellationToken cancellationToken, Client app_client)
         {
-            if (entities == null)
+            if (entities == null || !entities[0].Type.ToString().Contains("Mention"))
             {
                 await messageSend("Ты должен упомянуть через @ или на прямую", botClient, cancellationToken, message.Chat.Id);
-                return;
-            }
-            if (!entities[0].Type.ToString().Contains("Mention"))
-            {
-                await messageSend("Браток, ты никого не упомянул. Юзай @", botClient, cancellationToken, message.Chat.Id);
                 return;
             }
 
@@ -188,6 +175,7 @@ namespace BeholderArchi
             await messageSend("Успешно разбанен, теперь он может вернутся", botClient, cancellationToken, message.Chat.Id);
 
         }
+        
         async internal static Task muteUser(Message message, MessageEntity[] entities, ITelegramBotClient botClient,
                                   CancellationToken cancellationToken, Client app_client)
         {
@@ -203,48 +191,43 @@ namespace BeholderArchi
                 CanInviteUsers = false,
                 CanPinMessages = false
             };
-            if (entities != null)
+            if (entities == null || !entities[0].Type.ToString().Contains("Mention"))
             {
-                if (entities[0] != null && entities[0].User != null)
-                {
-                    try
-                    {
-                        await botClient.RestrictChatMemberAsync(message.Chat.Id, entities[0].User.Id, mutedPerms);
-                        await messageSend("Пользователь успешно был замучен", botClient, cancellationToken, message.Chat.Id);
-                    }
-                    catch 
-                    {
-                        await messageSend("Походу это админ... или какае-то другая ошибка", botClient, cancellationToken, message.Chat.Id);
-                    }
-                }
-                else if (entities != null && entities[0].Type.ToString().Equals("Mention"))
-                {
-                    string userName = message.Text.Substring(11);
-                    long UserInfo = await DLC.GetUserIdByUsernameAsync(userName, "5702729864:AAEkEyynxSnRcS4pe7C7gcA0eiThSCcwzlA", app_client);
-                    var UserId = UserInfo;
-                    try
-                    {
-                        if (UserId.Equals(message.From.Id))
-                        {
-                            await messageSend($"`Хе-Хе неплохо... Я бы мог предупредить но иначе вы бы не поняли что упускаете\n" +
+                await messageSend("Браток, ты никого не упомянул. Юзай @", botClient, cancellationToken, message.Chat.Id);
+                return;
+            }
+            if (entities[0].User != null)
+            {
+                await botClient.RestrictChatMemberAsync(message.Chat.Id, entities[0].User.Id, mutedPerms);
+                await messageSend("Успешно замучен", botClient, cancellationToken, message.Chat.Id);
+                return;
+            }
+
+            var userName = message.Text.Substring(11);
+            long memberId = await DLC.GetUserIdByUsernameAsync(userName, "5702729864:AAEkEyynxSnRcS4pe7C7gcA0eiThSCcwzlA", app_client);
+
+            if (memberId == 0)
+            {
+                await messageSend("Такого пользователя нет...", botClient, cancellationToken, message.Chat.Id);
+                return;
+            }
+            if (memberId.Equals(message.From.Id))
+            {
+                await messageSend($"`Хе-Хе неплохо... Я бы мог предупредить но иначе вы бы не поняли что упускаете\n" +
                                 $"И так прямо сейчас, на ваших глазах пользователь {GetFullName(message.From)} замутил сам себя\n" +
-                                "Совет на будущее - больше так не делай. Давайте ребята, верните ему голос! Я не сделаю это за вас`\n", botClient, cancellationToken, UserId);
-                            await messageSend("Скажи спасибо за это, создателю бота @I_am_Linuxoid", botClient, cancellationToken, chatId);
-                        }
-                        await botClient.RestrictChatMemberAsync(message.Chat.Id, UserId, mutedPerms);
-                        await messageSend("Пользователь успешно был замучен", botClient, cancellationToken, chatId);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.ToString());
-                        await messageSend("Походу это админ... Или какае-то другая ошибка", botClient, cancellationToken, chatId);
-                    }
-                }
+                                "Совет на будущее - больше так не делай. Давайте ребята, верните ему голос! Я не сделаю это за вас`\n", botClient, cancellationToken, chatId);
+                await messageSend("Скажи спасибо за это, создателю бота @I_am_Linuxoid", botClient, cancellationToken, chatId);
             }
-            else
+            try
             {
-                await messageSend("Используй упоминания пользователя через @ или ссылкой", botClient, cancellationToken, chatId);
+                await botClient.RestrictChatMemberAsync(message.Chat.Id, memberId, mutedPerms);
             }
+            catch
+            {
+                await messageSend("Может это админ? за репортами сюда @ArchisErrors", botClient, cancellationToken, message.Chat.Id);
+                return;
+            }
+            await messageSend("Успешно замучен", botClient, cancellationToken, message.Chat.Id);      
         }
         async internal static Task unmuteUser(Message message, MessageEntity[] entities, ITelegramBotClient botClient,
                                   CancellationToken cancellationToken, Client app_client)
@@ -261,114 +244,112 @@ namespace BeholderArchi
                 CanInviteUsers = true,
                 CanPinMessages = false
             };
-            if (entities != null)
+
+            if (entities == null || !entities[0].Type.ToString().Contains("Mention"))
             {
-                if (entities[0] != null && entities[0].User != null)
-                {
-                    try
-                    {
-                        await botClient.RestrictChatMemberAsync(message.Chat.Id, entities[0].User.Id, unMutedPerms);
-                        await messageSend("Пользователь успешно был раззамучен", botClient, cancellationToken, chatId);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                        await messageSend("Бред какой-то", botClient, cancellationToken, chatId);
-                    }
-                }
-                else if (entities != null && entities[0].Type.ToString().Equals("Mention"))
-                {
-                    string userName = message.Text.Substring(13);
-                    long UserInfo = await DLC.GetUserIdByUsernameAsync(userName, "5702729864:AAEkEyynxSnRcS4pe7C7gcA0eiThSCcwzlA", app_client);
-                    var UserId = UserInfo;
-                    try
-                    {
-                        await botClient.RestrictChatMemberAsync(message.Chat.Id, UserId, unMutedPerms);
-                        await messageSend("Пользователь успешно был раззамучен", botClient, cancellationToken, chatId);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.ToString());
-                        await messageSend("Пользователь успешно был раззамучен", botClient, cancellationToken, chatId);
-                    }
-                }
+                await messageSend("Браток, ты никого не упомянул. Юзай @", botClient, cancellationToken, message.Chat.Id);
+                return;
+            }           
+            if (entities[0].User != null)
+            {              
+                await botClient.RestrictChatMemberAsync(message.Chat.Id, entities[0].User.Id, unMutedPerms);
+                await messageSend("Успешно размучен", botClient, cancellationToken, message.Chat.Id);
+                return;
             }
-            else
+
+            var userName = message.Text.Substring(13);
+            long memberId = await DLC.GetUserIdByUsernameAsync(userName, "5702729864:AAEkEyynxSnRcS4pe7C7gcA0eiThSCcwzlA", app_client);
+
+            if (memberId == 0)
             {
-                await messageSend("Используй упоминания пользователя через @ или ссылкой", botClient, cancellationToken, chatId);
+                await messageSend("Такого пользователя нет...", botClient, cancellationToken, message.Chat.Id);
+                return;
             }
+            if (memberId.Equals(message.From.Id))
+            {
+                await messageSend($"`Хе-Хе неплохо... Я бы мог предупредить но иначе вы бы не поняли что упускаете\n" +
+                                $"И так прямо сейчас, на ваших глазах пользователь {GetFullName(message.From)} замутил сам себя\n" +
+                                "Совет на будущее - больше так не делай. Давайте ребята, верните ему голос! Я не сделаю это за вас`\n", botClient, cancellationToken, chatId);
+                await messageSend("Скажи спасибо за это, создателю бота @I_am_Linuxoid", botClient, cancellationToken, chatId);
+            }
+            try
+            {
+                await botClient.RestrictChatMemberAsync(message.Chat.Id, memberId, unMutedPerms);
+            }
+            catch
+            {
+                await messageSend("Может это админ? за репортами сюда @ArchisErrors", botClient, cancellationToken, message.Chat.Id);
+                return;
+            }
+            await messageSend("Успешно размучен", botClient, cancellationToken, message.Chat.Id);
         }
+
         async internal static Task chownFull(Message message, MessageEntity[] entities, ITelegramBotClient botClient,
                                   CancellationToken cancellationToken, Client app_client)
         {
             var chatId = message.Chat.Id;
-            if (entities != null)
+            if (entities == null || !entities[0].Type.ToString().Contains("Mention"))
             {
-                string userName = message.Text.Substring(17);
-                if (entities[0] != null && entities[0].User != null)
-                {
-                    try
-                    {
-                        await botClient.PromoteChatMemberAsync(message.Chat.Id, entities[0].User.Id, canManageChat: true, canRestrictMembers: true, canDeleteMessages: true, canPromoteMembers: true, canManageVideoChats: true, canInviteUsers: true);
-                        await messageSend("Пользователь был повышен", botClient, cancellationToken, chatId);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.ToString() + "\nWORKING CONTINUE");
-                        await messageSend("Что-то пошло не так, репорты сюда - @ArchisErrors", botClient, cancellationToken, chatId);
-                    }
-                }
-                else if (entities != null && entities[0].Type.ToString().Equals("Mention"))
-                {
-                    long UserInfo = await DLC.GetUserIdByUsernameAsync(userName, "5702729864:AAEkEyynxSnRcS4pe7C7gcA0eiThSCcwzlA", app_client);
-                    var UserId = UserInfo;
-                    try
-                    {
-                        await botClient.PromoteChatMemberAsync(message.Chat.Id, UserId, canManageChat: true, canRestrictMembers: true, canDeleteMessages: true, canPromoteMembers: true);
-                        await messageSend("Пользователь был повышен", botClient, cancellationToken, chatId);
-                    }
-                    catch
-                    {
-                        await messageSend("Фигня какае-то", botClient, cancellationToken, chatId);
-                    }
-                }
+                await messageSend("Браток, ты никого не упомянул. Юзай @", botClient, cancellationToken, message.Chat.Id);
+                return;
             }
-            else
+
+            if (entities[0].User != null)
             {
-                await messageSend("Используй упоминания пользователя через @ или ссылкой", botClient, cancellationToken, chatId);
+                await botClient.PromoteChatMemberAsync(message.Chat.Id, entities[0].User.Id, canManageChat: true, canRestrictMembers: true, canDeleteMessages: true, canPromoteMembers: true, canManageVideoChats: true, canInviteUsers: true);
+                await messageSend("Успешно повышен", botClient, cancellationToken, message.Chat.Id);
+                return;
             }
+
+            string userName = message.Text.Substring(17);
+            long memberId = await DLC.GetUserIdByUsernameAsync(userName, "5702729864:AAEkEyynxSnRcS4pe7C7gcA0eiThSCcwzlA", app_client);
+
+            if (memberId == 0) {await messageSend("Такого пользователя нет...", botClient, cancellationToken, message.Chat.Id); return;}
+
+            try
+            {
+                await botClient.PromoteChatMemberAsync(message.Chat.Id, memberId, canManageChat: true, canRestrictMembers: true, canDeleteMessages: true, canPromoteMembers: true, canManageVideoChats: true, canInviteUsers: true);
+            }
+            catch
+            {
+                await messageSend("Фигня. за репортами сюда @ArchisErrors", botClient, cancellationToken, message.Chat.Id);
+                return;
+            }
+            await messageSend("Успешно повышен", botClient, cancellationToken, message.Chat.Id);
         }
         async internal static Task chownNofull(Message message, MessageEntity[] entities, ITelegramBotClient botClient,
                                   CancellationToken cancellationToken, Client app_client)
         {
+            
             var chatId = message.Chat.Id;
-            if (entities != null)
+            if (entities == null || !entities[0].Type.ToString().Contains("Mention"))
             {
-                string userName = message.Text.Substring(19);
-                if (entities[0] != null && entities[0].User != null)
-                {
-                    try
-                    {
-                        await botClient.PromoteChatMemberAsync(message.Chat.Id, entities[0].User.Id, canManageChat: true, canRestrictMembers: true, canDeleteMessages: true, canPromoteMembers: false, canChangeInfo: false);
-                        await messageSend("пользователь был повышен", botClient, cancellationToken, chatId);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.ToString() + "\nWORKING CONTINUE");
-                        await messageSend("Что-то пошло не так, репорты сюда - @ArchisErrors", botClient, cancellationToken, chatId);
-                    }
-                }
-                else if (entities != null && entities[0].Type.ToString().Equals("Mention"))
-                {
-                    long UserId = await DLC.GetUserIdByUsernameAsync(userName, "5702729864:AAEkEyynxSnRcS4pe7C7gcA0eiThSCcwzlA", app_client);
-                    await botClient.PromoteChatMemberAsync(message.Chat.Id, UserId, canManageChat: true, canRestrictMembers: true, canDeleteMessages: true, canPromoteMembers: false, canChangeInfo: false);
-                    await messageSend("Пользователь успешно был повышен", botClient, cancellationToken, chatId);
-                }
+                await messageSend("Браток, ты никого не упомянул. Юзай @", botClient, cancellationToken, message.Chat.Id);
+                return;
             }
-            else
+
+            if (entities[0].User != null)
             {
-                await messageSend("Используй упоминания пользователя через @ или ссылкой", botClient, cancellationToken, chatId);
+                await botClient.PromoteChatMemberAsync(message.Chat.Id, entities[0].User.Id, canManageChat: true, canRestrictMembers: true, canDeleteMessages: true, canPromoteMembers: false, canChangeInfo: false);
+                await messageSend("Успешно повышен", botClient, cancellationToken, message.Chat.Id);
+                return;
             }
+
+            string userName = message.Text.Substring(19);
+            long memberId = await DLC.GetUserIdByUsernameAsync(userName, "5702729864:AAEkEyynxSnRcS4pe7C7gcA0eiThSCcwzlA", app_client);
+
+            if (memberId == 0) { await messageSend("Такого пользователя нет...", botClient, cancellationToken, message.Chat.Id); return; }
+
+            try
+            {
+                await botClient.PromoteChatMemberAsync(message.Chat.Id, memberId, canManageChat: true, canRestrictMembers: true, canDeleteMessages: true, canPromoteMembers: false, canChangeInfo: false);
+            }
+            catch
+            {
+                await messageSend("Фигня. за репортами сюда @ArchisErrors", botClient, cancellationToken, message.Chat.Id);
+                return;
+            }
+            await messageSend("Успешно повышен", botClient, cancellationToken, message.Chat.Id);
         }
         async internal static Task touch(Message message, ITelegramBotClient botClient,
                                   CancellationToken cancellationToken)
@@ -381,71 +362,67 @@ namespace BeholderArchi
                                   CancellationToken cancellationToken, Client app_client)
         {
             var chatId = message.Chat.Id;
+            ChatMember member;
             string userName = message.Text.Substring(16);
-            if (entities != null)
+            if (entities == null || !entities[0].Type.ToString().Contains("Mention"))
             {
-                if (entities[0] != null && entities[0].User != null)
-                {
-                    try
-                    {
-                        var member = await botClient.GetChatMemberAsync(chatId, entities[0].User.Id);
-                        string userPerms = GetFullPermissionList(member);
-                        await messageSend($"{userPerms}", botClient, cancellationToken, chatId);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.ToString() + "\nWORKING CONTINUE");
-                        await messageSend("Что-то пошло не так, репорты сюда - @ArchisErrors", botClient, cancellationToken, chatId);
-                    }
-                }
-                else if (entities != null && entities[0].Type.ToString().Equals("Mention"))
-                {
-                    long UserInfo = await DLC.GetUserIdByUsernameAsync(userName, "5702729864:AAEkEyynxSnRcS4pe7C7gcA0eiThSCcwzlA", app_client);
-                    var UserId = UserInfo;
-                    try
-                    {
-                        var member = await botClient.GetChatMemberAsync(chatId, UserId);
-                        string userPerms = GetFullPermissionList(member);
-                        await messageSend(userPerms, botClient, cancellationToken, chatId);
-                        Console.WriteLine(userPerms);
-                    }
-                    catch
-                    {
-                        await messageSend("Фигня каке-то, репорты сюда - @ArchisErrors", botClient, cancellationToken, chatId);
-                    }
-                }
+                await messageSend("Браток, ты никого не упомянул. Юзай @", botClient, cancellationToken, message.Chat.Id);
+                return;
             }
+
+            if (entities[0].User != null)
+            {
+                member = await botClient.GetChatMemberAsync(chatId, entities[0].User.Id);
+                await messageSend(GetFullPermissionList(member), botClient, cancellationToken, chatId);
+                return;
+            }
+
+            long memberId = await DLC.GetUserIdByUsernameAsync(userName, "5702729864:AAEkEyynxSnRcS4pe7C7gcA0eiThSCcwzlA", app_client);
+
+            if (memberId == 0) { await messageSend("Такого пользователя нет...", botClient, cancellationToken, message.Chat.Id); return; }
+
+            try
+            {
+                member = await botClient.GetChatMemberAsync(chatId, memberId);
+            }
+            catch
+            {
+                await messageSend("Фигня. за репортами сюда @ArchisErrors", botClient, cancellationToken, message.Chat.Id);
+                return;
+            }
+            await messageSend(GetFullPermissionList(member), botClient, cancellationToken, chatId);
         }
         async internal static Task chownNo(Message message, MessageEntity[] entities, ITelegramBotClient botClient,
                                   CancellationToken cancellationToken, Client app_client)
-        {
-            var chatId = message.Chat.Id;
-            if (entities != null)
+        {          
+            if (entities == null || !entities[0].Type.ToString().Contains("Mention"))
             {
-                string userName = message.Text.Substring(17);
-                if (entities[0] != null && entities[0].User != null)
-                {
-                    try
-                    {
-                        await botClient.PromoteChatMemberAsync(message.Chat.Id, entities[0].User.Id, canManageChat: false, canRestrictMembers: false, canDeleteMessages: false, canPromoteMembers: false, canChangeInfo: false);
-                        await messageSend("пользователь был понижен", botClient, cancellationToken, chatId);
-                    }
-                    catch 
-                    {
-                        await messageSend("Что-то пошло не так, репорты сюда - @ArchisErrors", botClient, cancellationToken, chatId);
-                    }
-                }
-                else if (entities != null && entities[0].Type.ToString().Equals("Mention"))
-                {
-                    long UserId = await DLC.GetUserIdByUsernameAsync(userName, "5702729864:AAEkEyynxSnRcS4pe7C7gcA0eiThSCcwzlA", app_client);
-                    await botClient.PromoteChatMemberAsync(message.Chat.Id, UserId, canManageChat: false, canRestrictMembers: false, canDeleteMessages: false, canPromoteMembers: false, canChangeInfo: false);
-                    await messageSend("Пользователь успешно был понижен", botClient, cancellationToken, chatId);
-                }
+                await messageSend("Браток, ты никого не упомянул. Юзай @", botClient, cancellationToken, message.Chat.Id);
+                return;
             }
-            else
+
+            if (entities[0].User != null)
             {
-                await messageSend("Используй упоминания пользователя через @ или ссылкой", botClient, cancellationToken, chatId);
+                await botClient.PromoteChatMemberAsync(message.Chat.Id, entities[0].User.Id, canManageChat: false, canRestrictMembers: false, canDeleteMessages: false, canPromoteMembers: false, canChangeInfo: false);
+                await messageSend("Успешно понижен", botClient, cancellationToken, message.Chat.Id);
+                return;
             }
+
+            string userName = message.Text.Substring(17);
+            long memberId = await DLC.GetUserIdByUsernameAsync(userName, "5702729864:AAEkEyynxSnRcS4pe7C7gcA0eiThSCcwzlA", app_client);
+
+            if (memberId == 0) { await messageSend("Такого пользователя нет...", botClient, cancellationToken, message.Chat.Id); return; }
+
+            try
+            {
+                await botClient.PromoteChatMemberAsync(message.Chat.Id, memberId, canManageChat: false, canRestrictMembers: false, canDeleteMessages: false, canPromoteMembers: false, canChangeInfo: false);
+            }
+            catch
+            {
+                await messageSend("Фигня. за репортами сюда @ArchisErrors", botClient, cancellationToken, message.Chat.Id);
+                return;
+            }
+            await messageSend("Успешно понижен", botClient, cancellationToken, message.Chat.Id);
         }
         async internal static Task messageSend(string text, ITelegramBotClient botClient, CancellationToken cancellationToken, ChatId chatId)
         {
@@ -497,7 +474,9 @@ namespace BeholderArchi
             return FullName;
         }
         internal static string GetFullName(Telegram.Bot.Types.Chat chat) {
-            string FullName = chat.FirstName + chat.LastName;
+            var chatName = (chat.FirstName != null) ? chat.FirstName : chat.Title;
+            var chatLastName = (chat.LastName != null) ? chat.LastName : ";";
+            string FullName = chatName + chat.LastName;
             return FullName;
         }
         internal static bool IsHaveBanPerms(ChatMember member)
