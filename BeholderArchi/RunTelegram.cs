@@ -62,14 +62,17 @@ namespace BeholderArchi
                 return;
             if (message.Text is not { } messageText)
                 return;
-            if (message.Text.Contains("sudo") && message.Text.ToString().Substring(0, 4).Equals("sudo"))
+            if (message.Text.Contains("sudo") && message.Text.Substring(0, 4).Equals("sudo"))
             {
                 
                 var chatId = message.Chat.Id;
+
                 var titleOrName = (message.Chat.Title != null) ? message.Chat.Title : Functionality.GetFullName(message.Chat);
                 var bioOrDescription = (message.Chat.Description != null) ? message.Chat.Description : message.Chat.Bio;
+
                 JsonWorker.SaveChat(chatId, titleOrName, bioOrDescription);
-                await Program.ConsoleLog($"$[{DateTime.Now}] | @{message.From.Username} in {message.Chat.Title} -- writed \"{message.Text}\".");
+
+                await Program.ConsoleLog($"$[{message.Date}] | @{message.From.Username} in {message.Chat.Title} -- writed \"{message.Text}\".");
                 
 
                 if (message.Text.Contains("echo"))
@@ -235,11 +238,11 @@ namespace BeholderArchi
                         cancellationToken: cancellationToken);
                 }
             }
-            else if (message.Text.Contains("бот") && message.Text.ToString().Substring(0, 3).Equals("бот"))
+            else if (message.Text.ToLower().Equals("бот"))
             {
                 await Functionality.messageSend("Проблемы? где волшебное слово?", botClient, cancellationToken, message.Chat.Id);
             }
-            else if (message.Text.Contains("пожалуйста") && message.Text.ToString().Substring(0, 10).Equals("пожалуйста"))
+            else if (message.Text.ToLower().Equals("пожалуйста"))
             {
                 await Functionality.messageSend("Есть ещё более волщебное слово) https://www.kjprojs.tk/Archi", botClient, cancellationToken, message.Chat.Id);
             }
@@ -258,8 +261,7 @@ namespace BeholderArchi
                     => $"Telegram API Error:\n[{apiRequestException.ErrorCode}]\n{apiRequestException.Message}",
                 _ => exception.ToString()
             };
-
-            //Program.ConsoleLog("[ERROR] -- "+ErrorMessage);
+          
             return Task.CompletedTask;
         }
     }
