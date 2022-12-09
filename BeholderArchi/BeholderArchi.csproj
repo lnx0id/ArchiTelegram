@@ -12,6 +12,7 @@
     <Version>1.2</Version>
     <PackageIcon>ARCHI.png</PackageIcon>
     <ApplicationIcon>ARCHI.ico</ApplicationIcon>
+    <SignAssembly>False</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>

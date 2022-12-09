@@ -30,6 +30,36 @@ namespace BeholderArchi
         {
             await messageSend("Writed by @I_am_Linuxoid\nЯ даже не юзал stackoverfow. только один вопросик на хабре:)", botClient, cancellationToken, message.Chat.Id);
         }
+
+        async internal static Task leave(ITelegramBotClient botClient, long chatId)
+        {
+            await botClient.LeaveChatAsync(chatId: chatId);
+        }
+        async internal static Task help(Message message, ITelegramBotClient botClient,
+            CancellationToken cancellationToken)
+        {
+            string commandsToOutput = "";
+            for (int i = 0; i < reserved.Length; i++)
+            {
+                if (i == 0)
+                {
+                    commandsToOutput += "$sudo " + Functionality.reserved[i].ToString();
+                }
+                else
+                {
+                    commandsToOutput += "\n$sudo " + Functionality.reserved[i].ToString();
+                }
+
+            }
+            await messageSend($"___\n{commandsToOutput}\n//Исользование без $\n___", botClient, cancellationToken, message.Chat.Id);
+        }
+
+        async internal static Task check(Message message, ITelegramBotClient botClient,
+            CancellationToken cancellationToken)
+        {
+            await messageSend("Да всё норм. Не кипишуй", botClient, cancellationToken, message.Chat.Id);
+        }
+
         async internal static Task echo(Message message, ITelegramBotClient botClient, CancellationToken cancellationToken)
         {
             try
@@ -48,9 +78,10 @@ namespace BeholderArchi
             var FullInfoForOutput = GetFullInfoAboutUser(iMember);
             await messageSend(FullInfoForOutput + "\n\n -- Для списка админов $sudo owner", botClient, cancellationToken, message.Chat.Id);
         }
-        async internal static Task ping(Message message, MessageEntity[] entities, ITelegramBotClient botClient,
+        async internal static Task ping(Message message, ITelegramBotClient botClient,
                                   CancellationToken cancellationToken, Client app_client)
         {
+            var entities = message.Entities;
             ChatMember member;
             if (entities == null || !entities[0].Type.ToString().Contains("Mention")) {
                 await messageSend("Ты должен упомянуть через @ или на прямую", botClient, cancellationToken, message.Chat.Id);
@@ -77,7 +108,8 @@ namespace BeholderArchi
 
             
         }
-        async internal static Task printAdminsList(Message message, ITelegramBotClient botClient, CancellationToken cancellationToken)
+
+        public async static Task printAdminsList(Message message, ITelegramBotClient botClient, CancellationToken cancellationToken)
         {
             var members = await botClient.GetChatAdministratorsAsync(message.Chat.Id);
             string Perms = "";
@@ -90,9 +122,10 @@ namespace BeholderArchi
 
         }
 
-        async internal static Task banUser(Message message, MessageEntity[] entities, ITelegramBotClient botClient,
+        async internal static Task banUser(Message message, ITelegramBotClient botClient,
                                   CancellationToken cancellationToken, Client app_client)
         {
+            var entities = message.Entities;
             if (entities == null || !entities[0].Type.ToString().Contains("Mention"))
             {
                 await messageSend("Браток, ты никого не упомянул. Юзай @", botClient, cancellationToken, message.Chat.Id);
@@ -129,10 +162,12 @@ namespace BeholderArchi
                 return;
             }
             await messageSend("Успешно забанен", botClient, cancellationToken, message.Chat.Id);
+            return;
         }
-        async internal static Task unbanUser(Message message, MessageEntity[] entities, ITelegramBotClient botClient,
+        async internal static Task unbanUser(Message message, ITelegramBotClient botClient,
                                   CancellationToken cancellationToken, Client app_client)
         {
+            var entities = message.Entities;
             if (entities == null || !entities[0].Type.ToString().Contains("Mention"))
             {
                 await messageSend("Ты должен упомянуть через @ или на прямую", botClient, cancellationToken, message.Chat.Id);
@@ -176,9 +211,10 @@ namespace BeholderArchi
 
         }
         
-        async internal static Task muteUser(Message message, MessageEntity[] entities, ITelegramBotClient botClient,
+        async internal static Task muteUser(Message message, ITelegramBotClient botClient,
                                   CancellationToken cancellationToken, Client app_client)
         {
+            var entities = message.Entities;
             var chatId = message.Chat.Id;
             var mutedPerms = new ChatPermissions
             {
@@ -229,9 +265,10 @@ namespace BeholderArchi
             }
             await messageSend("Успешно замучен", botClient, cancellationToken, message.Chat.Id);      
         }
-        async internal static Task unmuteUser(Message message, MessageEntity[] entities, ITelegramBotClient botClient,
+        async internal static Task unmuteUser(Message message, ITelegramBotClient botClient,
                                   CancellationToken cancellationToken, Client app_client)
         {
+            var entities = message.Entities;
             var chatId = message.Chat.Id;
             var unMutedPerms = new ChatPermissions
             {
@@ -284,9 +321,10 @@ namespace BeholderArchi
             await messageSend("Успешно размучен", botClient, cancellationToken, message.Chat.Id);
         }
 
-        async internal static Task chownFull(Message message, MessageEntity[] entities, ITelegramBotClient botClient,
+        async internal static Task chownFull(Message message, ITelegramBotClient botClient,
                                   CancellationToken cancellationToken, Client app_client)
         {
+            var entities = message.Entities;
             var chatId = message.Chat.Id;
             if (entities == null || !entities[0].Type.ToString().Contains("Mention"))
             {
@@ -316,11 +354,12 @@ namespace BeholderArchi
                 return;
             }
             await messageSend("Успешно повышен", botClient, cancellationToken, message.Chat.Id);
+            
         }
-        async internal static Task chownNofull(Message message, MessageEntity[] entities, ITelegramBotClient botClient,
+        async internal static Task chownNofull(Message message, ITelegramBotClient botClient,
                                   CancellationToken cancellationToken, Client app_client)
         {
-            
+            var entities = message.Entities;
             var chatId = message.Chat.Id;
             if (entities == null || !entities[0].Type.ToString().Contains("Mention"))
             {
@@ -358,9 +397,10 @@ namespace BeholderArchi
             var inviteLink = await botClient.CreateChatInviteLinkAsync(message.Chat.Id);
             await messageSend($"{inviteLink.InviteLink} - отправте эту ссылку кому-то чтообы пригласить его в этот чат", botClient, cancellationToken, message.Chat.Id);
         }
-        async internal static Task chownGet(Message message, MessageEntity[] entities, ITelegramBotClient botClient,
+        async internal static Task chownGet(Message message, ITelegramBotClient botClient,
                                   CancellationToken cancellationToken, Client app_client)
         {
+            var entities = message.Entities;
             var chatId = message.Chat.Id;
             ChatMember member;
             string userName = message.Text.Substring(16);
@@ -392,9 +432,10 @@ namespace BeholderArchi
             }
             await messageSend(GetFullPermissionList(member), botClient, cancellationToken, chatId);
         }
-        async internal static Task chownNo(Message message, MessageEntity[] entities, ITelegramBotClient botClient,
+        async internal static Task chownNo(Message message, ITelegramBotClient botClient,
                                   CancellationToken cancellationToken, Client app_client)
-        {          
+        {
+            var entities = message.Entities;
             if (entities == null || !entities[0].Type.ToString().Contains("Mention"))
             {
                 await messageSend("Браток, ты никого не упомянул. Юзай @", botClient, cancellationToken, message.Chat.Id);
@@ -430,6 +471,7 @@ namespace BeholderArchi
                             chatId: chatId,
                             text: text,
                             cancellationToken: cancellationToken);
+            return;
         }
 
         internal static string GetFullPermissionList(ChatMember member)
@@ -474,8 +516,8 @@ namespace BeholderArchi
             return FullName;
         }
         internal static string GetFullName(Telegram.Bot.Types.Chat chat) {
-            var chatName = (chat.FirstName != null) ? chat.FirstName : chat.Title;
-            var chatLastName = (chat.LastName != null) ? chat.LastName : ";";
+            var chatName = chat.FirstName ?? chat.Title;
+            var chatLastName = chat.LastName ?? ";";
             string FullName = chatName + chat.LastName;
             return FullName;
         }

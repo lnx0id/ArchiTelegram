@@ -12,9 +12,9 @@ namespace BeholderArchi
     {
         private RunTelegram dLC;
 
-
         public FormMain()
         {
+            dLC = new RunTelegram();
             InitializeComponent();
         }
         /// <summary>
@@ -26,7 +26,7 @@ namespace BeholderArchi
 
         private void FormMain_Load(object sender, EventArgs e)
         {
-            dLC = new RunTelegram();
+            
         }
         private void FormMain_Leave(object sender, EventArgs e)
         {
@@ -35,53 +35,17 @@ namespace BeholderArchi
 
         private void SeeLogsLable_Click(object sender, EventArgs e)
         {
-            string docPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            try
-            {
-                if (System.IO.File.Exists($"{docPath}\\ARCHII\\log.txt"))
-                {
-                    Process.Start("notepad.exe", @$"{docPath}\ARCHII\log.txt");
-                }
-                else
-                {
-                    throw new FileNotFoundException();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString() + "\n\n-- Ìמזוע בûעü פאיכ וש¸ םו סמחהאם המזהטעוסü ןונגמדמ כמדא", "ÏÎÕÎÆÅ ÍÅÒÓ ÔÀÉËÀ", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            openFileByNotepad("log.txt");
         }
 
         private void Console_Click(object sender, EventArgs e)
         {
-            string docPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            try
-            {
-                if (System.IO.File.Exists($"{docPath}\\ARCHII\\log.txt")){
-                    Process.Start("notepad.exe", @$"{docPath}\ARCHII\log.txt"); 
-                }else
-                {
-                    MessageBox.Show("\n\n-- פאיכ כמדמג וש¸ םו סמחהאם המזהטעוסü ןונגמדמ כמדא", "ÍÅÒÓ ÔÀÉËÀ", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString()+"\n\n-- ÂÎÓ ÄÅËÎ ÏËÎÕÎ", "ÊÀÊÅ-ÒÎ ÎØÈÁÊÀ", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            openFileByNotepad("log.txt");
         }
 
         private void UpdateListButton_Click(object sender, EventArgs e)
         {
-            string docPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            if (System.IO.File.Exists($"{docPath}\\ARCHII\\chats.json"))
-            {
-                Process.Start("notepad.exe", @$"{docPath}\ARCHII\chats.json");
-            }
-            else
-            {
-                MessageBox.Show("\n\n-- פאיכ ס קאעאלט וש¸ םו סמחהאם המזהטעוסü ןונגמדמ כמדא", "ÍÅÒÓ ÔÀÉËÀ", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            openFileByNotepad("chats.json");
         }
 
         private async void button1_Click(object sender, EventArgs e)
@@ -94,9 +58,28 @@ namespace BeholderArchi
                 ConsoleLog($"{messageContext} sended to {chatId}");
             }
             catch {
-                Program.ConsoleLog("ERROR!!!", this);
+                Task.Run(() => Program.ConsoleLog("[ERROR] with sending")).Wait();
             }
 
+        }
+        private void openFileByNotepad(string fileName)
+        {
+            string docPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            try
+            {
+                if (System.IO.File.Exists($"{docPath}\\ARCHII\\"+fileName))
+                {
+                    Process.Start("notepad.exe", @$"{docPath}\ARCHII\"+fileName);
+                }
+                else
+                {
+                    MessageBox.Show("\n\n-- פאיכ כמדמג וש¸ םו סמחהאם המזהטעוסü ןונגמדמ כמדא", "ÍÅÒÓ ÔÀÉËÀ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString() + "\n\n-- ÂÎÓ ÄÅËÎ ÏËÎÕÎ", "ÊÀÊÅ-ÒÎ ÎØÈÁÊÀ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }
