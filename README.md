@@ -1,5 +1,5 @@
-# ArchiV1.2
+# Beholder Archi Unstable (support 2023-2024)
+Archi is the group manager telegram bot based on c#, might not work because of API changes...
 
-после загрузки архива с исходниками, 
-нужно его разблокировать файл.zip -> свойста -> разблокировать(галочка внизу)
-А так всё работет
+// file.zip -> properties -> unlock?(the checkbox at the bottom)
+
