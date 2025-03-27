@@ -24,8 +24,8 @@ namespace BeholderArchi
 
         CancellationTokenSource cancelatioTokenSource = new CancellationTokenSource();
 
-        int api_id = 2919669;
-        string api_hash = "0e858678d2ff61c95a6993799d895c25";
+        int api_id = 0;
+        string api_hash = "/";
         Client app_client;
         List<IAction> actions;
         private bool NowExit;
