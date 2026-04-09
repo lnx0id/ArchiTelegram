@@ -41,7 +41,7 @@ namespace BeholderArchi
             };
 
             app_client = new Client(api_id, api_hash);
-            botClient = new TelegramBotClient("5702729864:AAEkEyynxSnRcS4pe7C7gcA0eiThSCcwzlA");
+            botClient = new TelegramBotClient(api_hash);
 
             var receiverOptions = new ReceiverOptions
             {
